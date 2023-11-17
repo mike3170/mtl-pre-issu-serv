@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="com.stit_mtl0140m_war_1.0-SNAPSHOTPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>com.stit.entity.BasVenMastAng</class>
+    <class>com.stit.entity.BasCstMastD3</class>
+    <class>com.stit.entity.BasCstMastD</class>
+    <class>com.stit.entity.BasCstMastD1</class>
+    <class>com.stit.entity.BasCstMast</class>
+    <class>com.stit.entity.BaseEntity</class>
+    <class>com.stit.entity.MtlPurOrdeMAng</class>
+    <class>com.stit.entity.MtlPurOrdeDAng</class>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@192.168.1.50:1526:bydb"/>
+      <property name="javax.persistence.jdbc.user" value="byerp"/>
+      <property name="javax.persistence.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
+      <property name="javax.persistence.jdbc.password" value="byerp"/>
+    </properties>
+  </persistence-unit>
+</persistence>

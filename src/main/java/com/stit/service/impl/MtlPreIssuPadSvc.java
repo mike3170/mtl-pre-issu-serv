@@ -39,7 +39,7 @@ public class MtlPreIssuPadSvc {
         Integer failCount = 0;
         try {
             for (InsertDto dto : dtoList) {
-                SimpleJdbcCall sp = new SimpleJdbcCall(this.jdbc).withProcedureName("SP_INS_MTL_ISSU_PAD_TEST");
+                SimpleJdbcCall sp = new SimpleJdbcCall(this.jdbc).withProcedureName("SP_INS_MTL_ISSU_PAD");
                 MapSqlParameterSource params = new MapSqlParameterSource()
                         .addValue("pv_sheet_no", dto.getSheetNo(), Types.VARCHAR)
                         .addValue("pn_item_no", dto.getItemNo(), Types.VARCHAR)

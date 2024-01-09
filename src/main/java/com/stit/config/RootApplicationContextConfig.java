@@ -18,13 +18,13 @@ public class RootApplicationContextConfig {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName("oracle.jdbc.OracleDriver");
 //--customer
-//        hikariConfig.setJdbcUrl("jdbc:oracle:thin:@192.168.0.6:1521:jherpdb"); 
+        hikariConfig.setJdbcUrl("jdbc:oracle:thin:@192.168.0.6:1521:jherpdb"); 
 //        hikariConfig.setJdbcUrl("jdbc:oracle:thin:@61.218.236.217:1521:jherpdb");
         hikariConfig.setUsername("jherp");
         hikariConfig.setPassword("jherp2012");       
 
 //--office
-        hikariConfig.setJdbcUrl("jdbc:oracle:thin:@192.168.1.56:1526:jhdb");
+//        hikariConfig.setJdbcUrl("jdbc:oracle:thin:@192.168.1.56:1526:jhdb");
 //        hikariConfig.setUsername("jherp");
 //        hikariConfig.setPassword("jherp2012");
 

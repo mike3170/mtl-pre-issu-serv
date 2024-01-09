@@ -3,6 +3,7 @@ package com.stit.service.impl;
 import com.stit.common.Pair;
 import com.stit.dao.GetMtlInfoDao;
 import com.stit.dao.MtlPrepPadDao;
+import com.stit.dto.InsertDto;
 import com.stit.dto.MtlPrepPadDto;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -16,8 +17,10 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
+import java.sql.Types;
 
 /**
  *
@@ -28,8 +31,44 @@ public class MtlPreIssuPadSvc {
 
     @Autowired
     private JdbcTemplate jdbc;
+    public String insertData(List<InsertDto> dtoList) throws ClassNotFoundException, SQLException {
+        
+        String success;
+        String errMesg;
+        Integer sucessCount = 0;
+        Integer failCount = 0;
+        try {
+            for (InsertDto dto : dtoList) {
+                SimpleJdbcCall sp = new SimpleJdbcCall(this.jdbc).withProcedureName("SP_INS_MTL_ISSU_PAD_TEST");
+                MapSqlParameterSource params = new MapSqlParameterSource()
+                        .addValue("pv_sheet_no", dto.getSheetNo(), Types.VARCHAR)
+                        .addValue("pn_item_no", dto.getItemNo(), Types.VARCHAR)
+                        .addValue("pv_emp_no", dto.getInsertEmp(), Types.VARCHAR);
+                System.out.println("dto:"+dto.getSheetNo()+"@"+dto.getItemNo()+"@"+dto.getInsertEmp());
+                Map out = sp.execute(params);
+                success = (String) out.get("PV_SUCCESS");
+                errMesg = (String) out.get("PV_ERROR_MESG");
+                System.out.println("sucess:"+ success);
+                if (success.equals("Y")) {
+                    sucessCount++;
+                } else {
+                    failCount++;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("err:" + e.getMessage());
+        }
 
-    public Boolean insertData(Pair pair) throws ClassNotFoundException, SQLException {
+        if (sucessCount != 0 && failCount == 0) {
+            return "成功:" + sucessCount + "筆";
+        } else if (sucessCount == 0 && failCount != 0) {
+            return "失敗:" + failCount + "筆";
+        } else {
+            return "成功:" + sucessCount + "筆 失敗:" + failCount + "筆";
+        }
+
+    }
+    public Boolean insertData_bak(Pair pair) throws ClassNotFoundException, SQLException {
 
 //        String sql = "insert into mtl_pad_issu_chk(pad_sheet, crea_date, crea_emp)"
 //                + "                         values(?, ?, ?)";
@@ -55,6 +94,19 @@ public class MtlPreIssuPadSvc {
     public Boolean updateByRecord(MtlPrepPadDto dto) throws SQLException {
         Boolean result = this.execChkSp(dto.getSheetNo(), dto.getItemNo(), dto.getSeqNo(), dto.getMtlSeq(), dto.getNewOld(), dto.getLocation(), dto.getIssuQty());
 
+        String confYn = null;
+        LocalDateTime confDate = LocalDateTime.now();
+        Timestamp ts = null;
+        if (dto.getIssuQty() == BigDecimal.ZERO) {
+            confYn = "N";
+            confDate = null;
+            ts = null;
+        } else {
+            confYn = "Y";
+            confDate = LocalDateTime.now();
+            ts = Timestamp.valueOf(confDate);
+        }
+
         if (result) {
             /*
             String sql = """
@@ -76,20 +128,53 @@ public class MtlPreIssuPadSvc {
                     + "      new_old = ?, "
                     + "      location = ?, "
                     + "      issu_qty = ?, "
-                    + "      conf_yn = 'Y', "
+                    + "      conf_yn = ?, "
                     + "      conf_date = ? "
                     + " WHERE sheet_no = ? "
                     + "       AND item_no = ? "
                     + "       AND seq_no = ? ";
-            LocalDateTime now = LocalDateTime.now();
-            Timestamp ts = Timestamp.valueOf(now);
 
-            int successCount = this.jdbc.update(sql, new Object[]{dto.getMtlSeq(), dto.getNewOld(), dto.getLocation(), dto.getIssuQty(), ts, dto.getSheetNo(), dto.getItemNo(), dto.getSeqNo()});
+            int successCount = this.jdbc.update(sql, new Object[]{dto.getMtlSeq(), dto.getNewOld(), dto.getLocation(), dto.getIssuQty(), confYn, ts, dto.getSheetNo(), dto.getItemNo(), dto.getSeqNo()});
             return result;
         } else {
             return result;
         }
 
+    }
+
+    public String delete(List<MtlPrepPadDto> dtoList) {
+        String success;
+        String errMesg;
+        Integer sucessCount = 0;
+        Integer failCount = 0;
+        try {
+            for (MtlPrepPadDto dto : dtoList) {
+                SimpleJdbcCall sp = new SimpleJdbcCall(this.jdbc).withProcedureName("SP_PAD_DEL_MTL_PREP");
+                MapSqlParameterSource params = new MapSqlParameterSource()
+                        .addValue("pv_sheet_no", dto.getSheetNo(), Types.VARCHAR)
+                        .addValue("pn_item_no", dto.getItemNo(), Types.VARCHAR);
+
+                Map out = sp.execute(params);
+                success = (String) out.get("PV_SUCCESS");
+                errMesg = (String) out.get("PV_ERROR_MESG");
+                System.out.println("sucess:"+ success);
+                if (success.equals("Y")) {
+                    sucessCount++;
+                } else {
+                    failCount++;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("err:" + e.getMessage());
+        }
+
+        if (sucessCount != 0 && failCount == 0) {
+            return "成功:" + sucessCount + "筆";
+        } else if (sucessCount == 0 && failCount != 0) {
+            return "失敗:" + failCount + "筆";
+        } else {
+            return "成功:" + sucessCount + "筆 失敗:" + failCount + "筆";
+        }
     }
 
     public List<MtlPrepPadDao> findPrepData() {
@@ -98,7 +183,8 @@ public class MtlPreIssuPadSvc {
                 + "(SELECT parameter_value FROM con_trol WHERE parameter_code = 'MTL_PREP_TIME_E') prep_time_e"
                 + "   FROM mtl_prep_pad p, mtl_mast m"
                 + "  WHERE m.mtl_no = p.mtl_no"
-                + "    AND issu_yn = 'N'";
+                + "    AND issu_yn = 'N'"
+                + "ORDER BY p.mtl_no";
         List<MtlPrepPadDao> dao = jdbc.query(sql, new RowMapper<MtlPrepPadDao>() {
             @Override
             public MtlPrepPadDao mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -235,6 +321,28 @@ public class MtlPreIssuPadSvc {
             return true;
         } else {
             throw new RuntimeException(errMesg);
+        }
+
+    }
+
+    public Boolean chkNewSheet(String dateTime) {
+        String result;
+
+        try {
+            String sql = " SELECT DISTINCT 'Y'"
+                    + "      FROM mtl_prep_pad"
+                    + "     WHERE TO_CHAR(crea_date,'YYYY-MM-DD HH24:MI:SS') > ?";
+            Object[] params = {dateTime.replace("T", " ")};
+            List<String> resultList = jdbc.queryForList(sql, params, String.class);
+            System.out.println("result list:" + resultList + "time:"+dateTime);
+            if (!resultList.isEmpty()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println("ex:" + e);
+            throw new RuntimeException(e);
         }
 
     }

@@ -4,8 +4,10 @@ import com.stit.common.ApiResponse;
 import com.stit.common.Pair;
 import com.stit.dao.GetMtlInfoDao;
 import com.stit.dao.MtlPrepPadDao;
+import com.stit.dto.InsertDto;
 import com.stit.dto.MtlPrepPadDto;
 import com.stit.service.impl.MtlPreIssuPadSvc;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,12 +27,11 @@ public class MtlPreIssuController {
 
 
     @PutMapping("insert")
-    public ApiResponse insert(@RequestBody Pair pair) {
+    public ApiResponse insert(@RequestBody List<InsertDto> dtoList) {
         try {
-            System.out.println(pair.getValue());
-            Boolean result = this.svc.insertData(pair);
+            String result = this.svc.insertData(dtoList);
 
-            return ApiResponse.ok();
+            return ApiResponse.ok(result);
         } catch (Exception e) {
             e.printStackTrace();
             return ApiResponse.error(e.getMessage());
@@ -53,6 +54,17 @@ public class MtlPreIssuController {
             return ApiResponse.error(e.getMessage());
         }
     }
+    
+    @PutMapping("delete")
+    public ApiResponse delete(@RequestBody List<MtlPrepPadDto> dtoList) {
+        try {
+            System.out.println("Dto list:"+ dtoList);
+            String result = this.svc.delete(dtoList);
+            return ApiResponse.ok(result);
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }    
 
     @GetMapping("all")
     public ApiResponse findAll() {
@@ -93,5 +105,16 @@ public class MtlPreIssuController {
             return ApiResponse.error(e.getMessage());
         }
     }
+    
+    @GetMapping("chkNewSheet/{sheetTime}")
+    public ApiResponse chkNewSheet(@PathVariable String sheetTime) {
+        try {
+            Boolean result = this.svc.chkNewSheet(sheetTime);
+            
+            return ApiResponse.ok(result);
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }    
 
 }
